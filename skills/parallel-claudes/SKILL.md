@@ -8,145 +8,151 @@ description: >
 license: MIT
 metadata:
   author: joyco-studio
-  version: "0.0.1"
+  version: "0.0.2"
 ---
 
-# Parallel Claudes with `cw`
+# Parallel Claudes Orchestrator
 
-`cw` (Claude Worktree Manager) is a CLI tool that uses git worktrees to spin up isolated working directories so you can run multiple parallel Claude Code sessions against the same repository without interference.
-
-## When to Apply
-
-- The user wants to run multiple Claude Code sessions in parallel on the same repo
-- A task can be broken down into independent subtasks that don't conflict
-- The user wants to create isolated branches for different features/fixes simultaneously
-- The user needs to merge parallel work back together via PRs or local squash merges
+You are the **root orchestrator**. When the user asks you to parallelize work, you manage the entire lifecycle: analyze the task, split it into subtasks, create isolated worktrees, launch headless Claude subagents, monitor their progress, and merge everything back.
 
 ## Prerequisites
 
-- **Git** must be installed
-- **Claude Code CLI** (`claude`) must be available
-- **GitHub CLI** (`gh`) must be installed (required for PR-based merge)
-- **`cw` must be installed** — if not, install with:
+Before starting, verify these are available:
+
+- **`cw`** — if missing, install with: `curl -fsSL https://raw.githubusercontent.com/joyco-studio/cw/main/install.sh | bash`
+- **`claude`** CLI (Claude Code)
+- **`gh`** CLI (GitHub CLI, required for PR-based merge)
+
+## Your Orchestration Steps
+
+### Step 1: Analyze and Split
+
+When the user describes a task, break it into **independent subtasks** that won't create file conflicts. Each subtask becomes a worktree with its own Claude subagent.
+
+Rules for splitting:
+- Subtasks must not modify the same files
+- Each subtask should be self-contained and completable in isolation
+- Name worktrees descriptively (e.g., `feat-auth`, `fix-nav`, `add-tests`)
+
+Tell the user your plan before proceeding: list the subtasks, their names, and what each subagent will do.
+
+### Step 2: Create Worktrees
+
+Use the Bash tool to create all worktrees. **Always use `--no-open`** — without it, `cw new` enters an interactive prompt that will hang indefinitely.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joyco-studio/cw/main/install.sh | bash
+cw new <name> --no-open
 ```
 
-After installing, restart your shell so the `cw` function and tab completions are loaded.
-
-## Commands Reference
-
-| Command | Description |
-|---|---|
-| `cw new <name> [flags] [prompt]` | Create a new worktree and optionally launch Claude Code with a prompt |
-| `cw open <name> [prompt]` | Open Claude Code in an existing worktree |
-| `cw ls` | List all active `cw` worktrees with branch and commits-ahead count |
-| `cw cd <name>` | Change directory into a worktree |
-| `cw merge <name>` | Push branch and create a GitHub PR |
-| `cw merge <name> --local` | Squash-merge the branch locally (no PR) |
-| `cw rm <name>` | Remove a worktree and its branch |
-| `cw clean` | Remove all `cw` worktrees |
-| `cw upgrade` | Self-update to the latest release |
-
-### Flags for `cw new`
-
-- `--open` / `-o` — Open Claude Code immediately after creating the worktree
-- `--no-install` — Skip automatic dependency installation
-- `--no-open` — Create the worktree without opening Claude Code
-
-## Workflow
-
-### 1. Break Down the Task
-
-Identify independent subtasks that can be worked on in parallel without conflicting file changes. Each subtask gets its own worktree and Claude Code session.
-
-### 2. Create Worktrees
+Run all `cw new` commands sequentially in a single Bash call:
 
 ```bash
-# Create worktrees with descriptive names and prompts
-cw new auth --open "implement OAuth2 login flow"
-cw new api --open "build REST API endpoints for user management"
-cw new tests "add unit tests for the auth module"
+cw new feat-auth --no-open && cw new feat-api --no-open && cw new feat-tests --no-open
 ```
 
-Each worktree:
-- Creates an isolated copy of the repo at `.worktrees/<name>`
-- Creates a branch named `cw/<name>`
-- Auto-installs dependencies (detects npm, yarn, pnpm, pip)
-- Optionally launches Claude Code with the given prompt
+### Step 3: Launch Subagents
 
-### 3. Monitor Progress
+Launch a headless Claude process in each worktree using the Bash tool with **`run_in_background: true`**. Each subagent runs autonomously and exits when done.
+
+For each subtask, run a **separate** background Bash command:
 
 ```bash
-# See all active worktrees and how many commits each has
-cw ls
+cw cd <name> && claude -p "<detailed prompt>. Commit your changes when done." --output-format text
 ```
 
-### 4. Open or Resume Sessions
+**Critical rules:**
+- Use `-p` flag — this runs Claude in non-interactive (print) mode. It executes the prompt and exits.
+- Use `--output-format text` for clean output.
+- Always instruct the subagent to **commit its changes when done**. Without commits, `cw merge` has nothing to merge.
+- Launch all subagents in **parallel** — each one as its own background Bash call in a single message.
+- Write **detailed prompts** for each subagent. They have no context about the broader task — give them everything they need: what to build, where the relevant code is, what patterns to follow, and any constraints.
+
+### Step 4: Monitor Progress
+
+After launching, poll for completion:
+- Use `TaskOutput` with `block: false` to check on each background task without blocking.
+- Use `cw ls` to see commits-ahead count for each worktree.
+- Report progress to the user as subagents complete.
+
+### Step 5: Merge Results
+
+Once all subagents have completed and committed their work, merge each worktree:
 
 ```bash
-# Open Claude Code in an existing worktree
-cw open tests "now add integration tests too"
+# Via GitHub PRs
+cw merge <name>
 
-# Navigate into a worktree manually
-cw cd auth
+# Or locally (squash merge, no PR)
+cw merge <name> --local
 ```
 
-### 5. Merge Results
+Ask the user which merge strategy they prefer (PR vs local) before merging.
+
+If there are **dependencies between subtasks** (e.g., DB migrations before API routes), merge them in the correct order.
+
+### Step 6: Clean Up
+
+After all merges are complete:
 
 ```bash
-# Create a GitHub PR from the worktree branch
-cw merge auth
-
-# Or squash-merge locally without a PR
-cw merge api --local
-```
-
-### 6. Clean Up
-
-```bash
-# Remove a specific worktree
-cw rm tests
-
-# Remove all worktrees
 cw clean
 ```
 
-## Key Behaviors
+## `cw` Commands Reference
 
-- **Branch namespacing**: All branches are prefixed with `cw/` to avoid collisions
-- **Base branch detection**: Automatically finds `main` or `master`
-- **Gitignore**: Automatically adds `.worktrees/` to `.gitignore`
-- **Safety**: Warns before removing worktrees with unmerged changes
-- **Dependency install**: Detects lockfiles and runs the right package manager
+| Command | Description |
+|---|---|
+| `cw new <name> --no-open` | Create a worktree without interactive prompts |
+| `cw cd <name>` | Change directory into a worktree |
+| `cw ls` | List all worktrees with branch and commits-ahead count |
+| `cw merge <name>` | Push branch and create a GitHub PR |
+| `cw merge <name> --local` | Squash-merge locally (no PR) |
+| `cw rm <name>` | Remove a worktree and its branch |
+| `cw clean` | Remove all worktrees |
 
-## Example: Parallelizing a Feature
+## Example
 
+User asks: *"Build a settings feature with UI, API, and database layers"*
+
+**You do:**
+
+1. Tell the user the plan: 3 parallel subtasks — `feat-ui`, `feat-api`, `feat-db`
+
+2. Create worktrees (single Bash call):
 ```bash
-# Split a large feature into three parallel tasks
-cw new feat-ui --open "build the settings page UI components"
-cw new feat-api --open "create the settings API routes and handlers"
-cw new feat-db --open "add database migrations and models for settings"
+cw new feat-ui --no-open && cw new feat-api --no-open && cw new feat-db --no-open
+```
 
-# Check progress
-cw ls
+3. Launch 3 background subagents (3 parallel Bash calls, each with `run_in_background: true`):
+```bash
+cw cd feat-ui && claude -p "Build the settings page UI. Create components in src/components/settings/ using the existing design system in src/components/ui/. Include a form for updating user preferences with fields for: display name, email notifications toggle, and theme selector. Commit your changes when done." --output-format text
+```
+```bash
+cw cd feat-api && claude -p "Create REST API routes for settings in src/api/settings/. Add GET /api/settings and PUT /api/settings endpoints. Use the existing auth middleware from src/middleware/auth.ts. Return and accept JSON matching the Settings type. Commit your changes when done." --output-format text
+```
+```bash
+cw cd feat-db && claude -p "Add a settings table migration in src/db/migrations/. Columns: user_id (FK to users), display_name (text), email_notifications (boolean, default true), theme (text, default 'system'). Add the Settings model in src/db/models/. Commit your changes when done." --output-format text
+```
 
-# Merge each piece as it completes
-cw merge feat-db
-cw merge feat-api
-cw merge feat-ui
+4. Monitor with `TaskOutput` (block: false) and `cw ls`
 
-# Clean up
+5. Merge in dependency order:
+```bash
+cw merge feat-db && cw merge feat-api && cw merge feat-ui
+```
+
+6. Clean up:
+```bash
 cw clean
 ```
 
 ## Troubleshooting
 
-- **`cw cd` doesn't work**: Make sure you've sourced `cw` in your shell config (`source ~/.local/bin/cw` in `.zshrc`/`.bashrc`) and restarted your shell
-- **Merge conflicts**: Resolve manually in the worktree before running `cw merge`
-- **`gh` not found**: Install the GitHub CLI — `brew install gh` on macOS
-- **Uncommitted changes**: `cw merge` will refuse to merge if there are uncommitted changes in the worktree; commit or stash first
+- **`cw` not found**: Source it in the shell — `source ~/.local/bin/cw`
+- **`cw cd` doesn't change directory**: Ensure `cw` is loaded as a shell function, not just a script
+- **Merge conflicts**: Resolve manually in the worktree, commit, then retry `cw merge`
+- **`cw merge` refuses**: There are uncommitted changes in the worktree — the subagent may not have committed. Navigate in with `cw cd <name>` and commit manually
+- **Subagent hung/failed**: Check its output via `TaskOutput`. If stuck, stop the background task and retry with a revised prompt
 
 ## Reference
 
