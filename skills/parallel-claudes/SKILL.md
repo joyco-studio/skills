@@ -8,7 +8,7 @@ description: >
 license: MIT
 metadata:
   author: joyco-studio
-  version: "1.0.0"
+  version: "0.0.1"
 ---
 
 # Parallel Claudes with `cw`
