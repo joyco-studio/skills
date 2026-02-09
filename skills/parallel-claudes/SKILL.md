@@ -25,7 +25,7 @@ Before starting, verify these are available:
 
 ## Your Orchestration Steps
 
-### Step 1: Analyze and Split
+### Step 1: Analyze, Split, and Choose Merge Strategy
 
 When the user describes a task, break it into **independent subtasks** that won't create file conflicts. Each subtask becomes a worktree with its own Claude subagent.
 
@@ -35,6 +35,12 @@ Rules for splitting:
 - Name worktrees descriptively (e.g., `feat-auth`, `fix-nav`, `add-tests`)
 
 Tell the user your plan before proceeding: list the subtasks, their names, and what each subagent will do.
+
+**Before starting any work**, you MUST ask the user which merge strategy to use:
+- **Local merge** (`cw merge <name> --local`) — squash-merges directly into the current branch, no PR created.
+- **Remote merge via GitHub PR** (`cw merge <name>`) — pushes the branch and opens a GitHub PR for review.
+
+Use the `AskUserQuestion` tool to present this choice. Do NOT proceed to Step 2 until the user has answered.
 
 ### Step 2: Create Worktrees
 
@@ -57,12 +63,13 @@ Launch a headless Claude process in each worktree using the Bash tool with **`ru
 For each subtask, run a **separate** background Bash command:
 
 ```bash
-cw cd <name> && claude -p "<detailed prompt>. Commit your changes when done." --output-format text
+cw cd <name> && claude -p "<detailed prompt>. Commit your changes when done." --output-format text --dangerously-skip-permissions
 ```
 
 **Critical rules:**
 - Use `-p` flag — this runs Claude in non-interactive (print) mode. It executes the prompt and exits.
 - Use `--output-format text` for clean output.
+- **Always use `--dangerously-skip-permissions`** — subagents run in isolated worktrees (throwaway branches), so they need full autonomy to read, write, and execute without prompting for approval. Without this flag, subagents will hang waiting for permission in their terminal windows.
 - Always instruct the subagent to **commit its changes when done**. Without commits, `cw merge` has nothing to merge.
 - Launch all subagents in **parallel** — each one as its own background Bash call in a single message.
 - Write **detailed prompts** for each subagent. They have no context about the broader task — give them everything they need: what to build, where the relevant code is, what patterns to follow, and any constraints.
@@ -76,17 +83,15 @@ After launching, poll for completion:
 
 ### Step 5: Merge Results
 
-Once all subagents have completed and committed their work, merge each worktree:
+Once all subagents have completed and committed their work, merge each worktree using the strategy the user chose in Step 1:
 
 ```bash
-# Via GitHub PRs
+# If user chose remote (GitHub PR)
 cw merge <name>
 
-# Or locally (squash merge, no PR)
+# If user chose local (squash merge, no PR)
 cw merge <name> --local
 ```
-
-Ask the user which merge strategy they prefer (PR vs local) before merging.
 
 If there are **dependencies between subtasks** (e.g., DB migrations before API routes), merge them in the correct order.
 
@@ -125,13 +130,13 @@ cw new feat-ui --no-open && cw new feat-api --no-open && cw new feat-db --no-ope
 
 3. Launch 3 background subagents (3 parallel Bash calls, each with `run_in_background: true`):
 ```bash
-cw cd feat-ui && claude -p "Build the settings page UI. Create components in src/components/settings/ using the existing design system in src/components/ui/. Include a form for updating user preferences with fields for: display name, email notifications toggle, and theme selector. Commit your changes when done." --output-format text
+cw cd feat-ui && claude -p "Build the settings page UI. Create components in src/components/settings/ using the existing design system in src/components/ui/. Include a form for updating user preferences with fields for: display name, email notifications toggle, and theme selector. Commit your changes when done." --output-format text --dangerously-skip-permissions
 ```
 ```bash
-cw cd feat-api && claude -p "Create REST API routes for settings in src/api/settings/. Add GET /api/settings and PUT /api/settings endpoints. Use the existing auth middleware from src/middleware/auth.ts. Return and accept JSON matching the Settings type. Commit your changes when done." --output-format text
+cw cd feat-api && claude -p "Create REST API routes for settings in src/api/settings/. Add GET /api/settings and PUT /api/settings endpoints. Use the existing auth middleware from src/middleware/auth.ts. Return and accept JSON matching the Settings type. Commit your changes when done." --output-format text --dangerously-skip-permissions
 ```
 ```bash
-cw cd feat-db && claude -p "Add a settings table migration in src/db/migrations/. Columns: user_id (FK to users), display_name (text), email_notifications (boolean, default true), theme (text, default 'system'). Add the Settings model in src/db/models/. Commit your changes when done." --output-format text
+cw cd feat-db && claude -p "Add a settings table migration in src/db/migrations/. Columns: user_id (FK to users), display_name (text), email_notifications (boolean, default true), theme (text, default 'system'). Add the Settings model in src/db/models/. Commit your changes when done." --output-format text --dangerously-skip-permissions
 ```
 
 4. Monitor with `TaskOutput` (block: false) and `cw ls`
