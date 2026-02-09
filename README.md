@@ -7,3 +7,4 @@ This repo contains the agent skills for JOYCO.
 | Skill | Description |
 |-------|-------------|
 | [parallel-claudes](skills/parallel-claudes/SKILL.md) | Guide for running multiple parallel Claude Code sessions using `cw` (Claude Worktree Manager). Covers git worktree management, concurrent AI coding tasks, and merging results. |
+| [pr-description-writer](skills/pr-description-writer/SKILL.md) | Generate high-quality PR descriptions in Markdown. Supports issue, feature, and big-feature PR types with structured, production-ready output. |
