@@ -81,9 +81,35 @@ After launching, poll for completion:
 - Use `cw ls` to see commits-ahead count for each worktree.
 - Report progress to the user as subagents complete.
 
-### Step 5: Merge Results
+### Step 5: Verify Commits
 
-Once all subagents have completed and committed their work, merge each worktree using the strategy the user chose in Step 1:
+Before merging, verify that each subagent actually committed its work. Run `cw ls` and check that every worktree shows **commits ahead > 0**.
+
+```bash
+cw ls
+```
+
+If a worktree has **0 commits ahead**, the subagent failed to commit. Navigate into it and commit manually:
+
+```bash
+cw cd <name> && git add -A && git commit -m "Complete <subtask description>"
+```
+
+Do NOT proceed to merging until every worktree has at least one commit.
+
+After verifying, provide the user with the commands to step into each worktree manually in case they want to review or continue the work themselves:
+
+```
+To step into any worktree and take over:
+  cw cd <name>        # enter the worktree
+  claude              # start an interactive Claude session there
+```
+
+List all worktree names so the user can copy-paste. Then ask the user if they want to proceed with merging or take over manually.
+
+### Step 6: Merge Results
+
+Once all worktrees have verified commits, merge each one using the strategy the user chose in Step 1:
 
 ```bash
 # If user chose remote (GitHub PR)
@@ -95,7 +121,7 @@ cw merge <name> --local
 
 If there are **dependencies between subtasks** (e.g., DB migrations before API routes), merge them in the correct order.
 
-### Step 6: Clean Up
+### Step 7: Clean Up
 
 After all merges are complete:
 
