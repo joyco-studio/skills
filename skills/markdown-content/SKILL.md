@@ -1,11 +1,11 @@
 ---
 name: markdown-content
 description: >
-  Guide for building markdown content pages in Next.js using fumadocs-mdx, rehype-pretty-code,
-  and shiki. Covers the full content stack: MDX collections, prose typography, syntax-highlighted
-  code blocks, package manager command tabs, and the component mappings that keep rendered
-  markdown and custom React code components visually consistent. Based on the patterns used
-  in the JOYCO Hub (joyco-studio/hub).
+  Guide for building markdown content pages (blogs, legal, changelogs) in Next.js using
+  fumadocs-mdx, rehype-pretty-code, and shiki. Covers MDX collections, self-contained prose
+  typography, syntax-highlighted code blocks, package manager command tabs, and the component
+  mappings that keep rendered markdown and custom React code components visually consistent.
+  No documentation UI framework required.
 license: MIT
 metadata:
   author: joyco-studio
@@ -14,7 +14,7 @@ metadata:
 
 # Markdown Content Pages — Next.js
 
-This skill defines how to build content-driven pages (docs, blog posts, changelogs, component pages) in a Next.js App Router project using MDX. It captures the exact stack, configuration, and component patterns used in the JOYCO Hub.
+This skill defines how to build content-driven pages (blog posts, changelogs, legal pages, knowledge bases) in a Next.js App Router project using MDX. It captures the content stack, configuration, and component patterns extracted from JOYCO projects.
 
 The goal is **visual and behavioral consistency** between:
 
@@ -28,8 +28,7 @@ The goal is **visual and behavioral consistency** between:
 | Layer | Library | Purpose |
 |---|---|---|
 | Content framework | `fumadocs-mdx` | MDX collection definitions, frontmatter schemas, build-time processing |
-| Content runtime | `fumadocs-core` | Source loader, page tree, search, breadcrumbs |
-| UI primitives | `fumadocs-ui` | Layout shells, TOC, sidebar, default MDX component base |
+| Content runtime | `fumadocs-core` | Source loader, page tree, slug resolution |
 | Syntax highlighting | `shiki` + `rehype-pretty-code` | Dual-theme code highlighting at build time (MDX) and runtime (components) |
 | Schema validation | `zod` | Typed frontmatter with defaults and optional fields |
 | Styling | Tailwind CSS v4 | Utility-first styles, custom prose CSS, code block styles |
@@ -38,7 +37,7 @@ The goal is **visual and behavioral consistency** between:
 Install the core content dependencies:
 
 ```bash
-npm install fumadocs-mdx fumadocs-core fumadocs-ui shiki rehype-pretty-code zod
+npm install fumadocs-mdx fumadocs-core shiki rehype-pretty-code zod
 ```
 
 ---
@@ -47,20 +46,20 @@ npm install fumadocs-mdx fumadocs-core fumadocs-ui shiki rehype-pretty-code zod
 
 ```
 ├── app/
-│   ├── layout.tsx                       # Root layout with RootProvider from fumadocs-ui
+│   ├── layout.tsx                       # Root layout
 │   ├── styles/
 │   │   ├── globals.css                  # Tailwind imports + custom stylesheet imports
-│   │   ├── prose.css                    # Typography overrides for .prose class
+│   │   ├── prose.css                    # Typography styles for .prose class
 │   │   ├── shiki.css                    # Code block styling (line numbers, highlights, themes)
-│   │   └── theming.css                  # Color scheme variables (light/dark/custom themes)
-│   └── (docs)/                          # Route group for content pages
-│       ├── layout.tsx                   # Docs layout with sidebar, navigation
+│   │   └── theming.css                  # Color scheme variables (light/dark)
+│   └── (content)/                       # Route group for content pages
+│       ├── layout.tsx                   # Content layout (header, footer, max-width wrapper)
 │       └── [[...slug]]/
 │           └── page.tsx                 # Catch-all page rendering MDX content
 ├── content/
 │   ├── meta.json                        # Top-level page ordering
 │   ├── index.mdx                        # Landing page
-│   └── <category>/                      # e.g. components/, guides/, blog/
+│   └── <category>/                      # e.g. blog/, legal/, changelog/
 │       ├── meta.json                    # Category page ordering
 │       └── <page>.mdx                   # Individual content pages
 ├── components/
@@ -103,12 +102,12 @@ import {
 import { transformers } from './lib/shiki'
 import { cn } from './lib/utils'
 
-export const docs = defineDocs({
+export const pages = defineDocs({
   dir: 'content',
   docs: {
     schema: frontmatterSchema.extend({
       author: z.string().optional(),
-      maintainers: z.array(z.string()).default([]),
+      date: z.string().optional(),
       // Add your own custom frontmatter fields here
     }),
   },
@@ -174,12 +173,12 @@ export default withMDX(config)
 The runtime source loader that makes content pages queryable:
 
 ```ts
-import { docs } from 'fumadocs-mdx:collections/server'
+import { pages } from 'fumadocs-mdx:collections/server'
 import { type InferPageType, loader } from 'fumadocs-core/source'
 
 export const source = loader({
   baseUrl: '/',
-  source: docs.toFumadocsSource(),
+  source: pages.toFumadocsSource(),
 })
 
 export type Page = InferPageType<typeof source>
@@ -195,28 +194,21 @@ Every `.mdx` file starts with YAML frontmatter:
 
 ```mdx
 ---
-title: Action Hint
-description: A component that displays contextual action hints.
+title: Building Our Design System
+description: How we built a component library that scales across products.
 author: joyco
-maintainers:
-  - joyco
+date: "2025-03-15"
 ---
 
-import { ComponentPreview } from '@/components/preview/component-preview'
+## The Problem
 
-<ComponentPreview name="action-hint" />
-
-## Installation
-
-```bash
-npx shadcn@latest add "https://registry.joyco.studio/r/action-hint"
-```
-
-## Usage
+We needed a shared component library that worked across three products.
 
 ```tsx
-import { ActionHintEmitter, useActionHint } from '@/components/ui/action-hint'
+import { Button } from '@/components/ui/button'
 ```
+
+React components can be used inline alongside standard markdown.
 ```
 
 Rules for content files:
@@ -233,7 +225,7 @@ Controls page ordering within a directory:
 
 ```json
 {
-  "pages": ["index", "action-hint", "typewriter", "marquee"]
+  "pages": ["index", "building-our-design-system", "migrating-to-nextjs"]
 }
 ```
 
@@ -260,7 +252,7 @@ export default async function Page(props: {
   return (
     <article className="prose">
       <h1>{page.data.title}</h1>
-      <p className="text-fd-muted-foreground">{page.data.description}</p>
+      <p className="text-muted-foreground">{page.data.description}</p>
       <MDX components={getMDXComponents()} />
     </article>
   )
@@ -387,7 +379,7 @@ Used by custom React code components (not MDX) to produce the same visual output
 
 ```ts
 export const codeClasses = {
-  pre: "not-fumadocs-codeblock relative w-full overflow-auto p-4 has-[[data-line-numbers]]:px-0",
+  pre: "relative w-full overflow-auto p-4 has-[[data-line-numbers]]:px-0",
 }
 
 export async function highlightCode(code: string, language: string = 'tsx') {
@@ -430,22 +422,15 @@ This file maps HTML elements produced by the MDX compiler to custom React compon
 
 ```tsx
 import type { MDXComponents } from 'mdx/types'
-import defaultMdxComponents from 'fumadocs-ui/mdx'
-import { CodeTabs } from '@/components/code-tabs'
-import { FileCodeblock } from '@/components/code-source'
-import { ImageCols } from '@/components/image-cols'
+import Image from 'next/image'
 import { CopyButton } from '@/components/copy-button'
 import { PackageManagerCommand } from '@/components/package-manager-command'
 import { cn } from '@/lib/cn'
 
 export function getMDXComponents(): MDXComponents {
   return {
-    ...defaultMdxComponents,
-
-    // Custom components available in MDX files
-    CodeTabs,
-    FileCodeblock,
-    ImageCols,
+    // Image with Next.js optimization
+    img: (props) => <Image {...(props as any)} className="rounded-lg" />,
 
     // Inline code
     code: ({ children, className, ...props }) => {
@@ -700,7 +685,7 @@ export async function FileCodeblock({
 This component is used in MDX files to display actual source code from the project:
 
 ```mdx
-<FileCodeblock filePath="registry/joyco/blocks/action-hint.tsx" />
+<FileCodeblock filePath="examples/button.tsx" />
 ```
 
 ---
@@ -751,11 +736,98 @@ export function CopyButton({ text }: { text: string }) {
 
 ### `prose.css`
 
-Minimal overrides on top of fumadocs-ui defaults:
+Self-contained prose styles using Tailwind's `@apply` and CSS custom properties. This replaces `@tailwindcss/typography` with a minimal hand-rolled prose class that only styles what we need:
 
 ```css
 .prose {
   --tw-prose-body: color-mix(in oklab, var(--foreground) 70%, transparent);
+  color: var(--tw-prose-body);
+  line-height: 1.75;
+  max-width: 65ch;
+}
+
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where(.not-prose, .not-prose *)) {
+  color: var(--foreground);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.prose :where(h1):not(:where(.not-prose, .not-prose *)) {
+  font-size: 2.25rem;
+  margin-top: 0;
+}
+
+.prose :where(h2):not(:where(.not-prose, .not-prose *)) {
+  font-size: 1.5rem;
+}
+
+.prose :where(h3):not(:where(.not-prose, .not-prose *)) {
+  font-size: 1.25rem;
+}
+
+.prose :where(p):not(:where(.not-prose, .not-prose *)) {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose :where(a):not(:where(.not-prose, .not-prose *)) {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+
+.prose :where(strong):not(:where(.not-prose, .not-prose *)) {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.prose :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
+  padding-left: 1.625em;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose :where(li):not(:where(.not-prose, .not-prose *)) {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  font-style: italic;
+  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  margin-top: 1.6em;
+  margin-bottom: 1.6em;
+}
+
+.prose :where(hr):not(:where(.not-prose, .not-prose *)) {
+  border-color: var(--border);
+  margin-top: 3em;
+  margin-bottom: 3em;
+}
+
+.prose :where(table):not(:where(.not-prose, .not-prose *)) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875em;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose :where(th):not(:where(.not-prose, .not-prose *)) {
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.prose :where(td):not(:where(.not-prose, .not-prose *)) {
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 50%, transparent);
+  padding: 0.5em 0.75em;
 }
 
 .prose
@@ -766,8 +838,13 @@ Minimal overrides on top of fumadocs-ui defaults:
 }
 ```
 
-- **Body color** uses `color-mix` to set prose text at 70% of the foreground color, giving a softer reading experience.
+Key decisions:
+
+- **Body color** uses `color-mix` to set prose text at 70% of the foreground color, giving a softer reading experience than full-contrast text.
+- **`:where()` selectors** keep specificity at zero so overrides are easy.
+- **`.not-prose` escape hatch** — any element inside `.not-prose` is excluded from prose styling, used for code block titles and custom components.
 - **Code figures** get vertical margin (`my-6`) so they sit comfortably within prose, with first/last child margin resets.
+- **No `@tailwindcss/typography` dependency** — this is self-contained, using only project color variables.
 
 ### Applying Prose
 
@@ -778,8 +855,6 @@ The `.prose` class is applied on the article wrapper in the content page:
   <MDX components={getMDXComponents()} />
 </article>
 ```
-
-fumadocs-ui provides base prose styles. The custom `prose.css` applies targeted overrides.
 
 ---
 
@@ -925,15 +1000,12 @@ The main stylesheet imports everything in order:
 
 ```css
 @import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/animations.css';
-@import './shiki.css';
-@import './prose.css';
 @import './theming.css';
-@import './utilities.css';
+@import './prose.css';
+@import './shiki.css';
 ```
 
-Order matters — theming variables must be defined before they are consumed by shiki and prose styles.
+Order matters — `theming.css` defines the color variables (`--color-code`, `--foreground`, `--border`, etc.) that `prose.css` and `shiki.css` consume, so it must come first.
 
 ---
 
@@ -941,7 +1013,7 @@ Order matters — theming variables must be defined before they are consumed by 
 
 When setting up markdown content pages in a new project:
 
-1. Install dependencies: `fumadocs-mdx`, `fumadocs-core`, `fumadocs-ui`, `shiki`, `rehype-pretty-code`, `zod`
+1. Install dependencies: `fumadocs-mdx`, `fumadocs-core`, `shiki`, `rehype-pretty-code`, `zod`
 2. Create `source.config.ts` with your frontmatter schema and rehype-pretty-code pipeline
 3. Wrap `next.config.ts` with `createMDX()` from fumadocs-mdx
 4. Create `lib/source.ts` with the fumadocs-core loader
