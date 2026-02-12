@@ -84,7 +84,7 @@ Key patterns:
 
 - Call `plugins.shift()` inside `rehypePlugins` to remove the built-in fumadocs syntax highlighter, then `plugins.push()` rehype-pretty-code.
 - Configure **dual shiki themes** (one light, one dark) so both color sets are embedded in the markup. CSS toggles which is visible.
-- Pass custom **shiki transformers** that inject metadata (`__raw__`, `__iscommand__`, package manager variants) into the AST for components to read at render time.
+- Pass custom **shiki transformers** that inject metadata into the AST (raw source text, command detection flags) for components to read at render time.
 - Use `onVisitTitle` to add `not-prose` to code block title elements so prose typography doesn't affect them.
 
 ### `next.config.ts`
@@ -141,12 +141,9 @@ This module should export:
 
 1. **A language map** — `Record<string, BuiltinLanguage>` mapping file extensions (`ts`, `tsx`, `sh`, etc.) to shiki language identifiers. Plus a `getLanguageFromExtension()` helper.
 
-2. **Command detectors** — an array of `{ match, transform }` objects that detect package manager commands (`npm install`, `npx`, `npm run`) and produce per-manager variants (`__npm__`, `__yarn__`, `__pnpm__`, `__bun__`). Plus an `isCommand()` check.
+2. **Command detectors** — detect package manager commands (`npm install`, `npx`, `npm run`) and produce per-manager variant strings for npm, yarn, pnpm, and bun.
 
-3. **Shiki transformers** — run during MDX compilation, attaching metadata to AST nodes:
-   - `__raw__` on `pre` and `code` — the original code string (for copy button)
-   - `__iscommand__` — `"true"` if the code block is a detected command
-   - `__npm__`, `__yarn__`, `__pnpm__`, `__bun__` — per-manager command variants on `code` nodes
+3. **Shiki transformers** — run during MDX compilation, attaching custom properties to AST nodes that components read at render time. Attach the raw source string (for copy button), whether the block is a package manager command, and if so, the per-manager variant strings so the component mapping can render a switcher.
 
 4. **`highlightCode(code, language)`** — an async function using `codeToHtml()` with the **same dual themes** as the MDX pipeline. This is the consistency mechanism — both build-time and runtime highlighting use identical shiki config and produce the same data attributes (`data-line-numbers`, `data-line`), ensuring matching visual output everywhere.
 
@@ -160,9 +157,9 @@ Maps HTML elements from the MDX compiler to React components. This is the bridge
 
 Key mappings:
 
-- **`code`** — Reads shiki transformer metadata from props. If `__npm__`/`__yarn__`/`__pnpm__`/`__bun__` are present, renders a `PackageManagerCommand` switcher. Otherwise renders a styled inline `<code>` element.
+- **`code`** — Reads transformer metadata from props. If package manager variants are present, renders a command switcher. Otherwise renders a styled inline `<code>` element.
 
-- **`pre`** — Reads `__raw__` and `__iscommand__` from props. If it's a command, renders just the children (the `code` mapping handles it). Otherwise renders a `<pre>` with a `CopyButton` overlay using the raw text.
+- **`pre`** — Reads transformer metadata from props. If the block is a command, renders just the children (the `code` mapping handles it). Otherwise renders a `<pre>` with a `CopyButton` overlay using the raw source text.
 
 - **`img`** — Optionally wrap with Next.js `Image` for optimization.
 
