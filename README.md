@@ -2,6 +2,12 @@
 
 This repo contains the agent skills for JOYCO.
 
+## Install
+
+```sh
+pnpx skills add joyco-studio/skills
+```
+
 ## Skills
 
 | Skill | Description |
