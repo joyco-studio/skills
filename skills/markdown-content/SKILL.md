@@ -204,13 +204,11 @@ Clipboard button with visual feedback. Uses a `useCopyToClipboard` hook that cal
 
 ### `theming.css` — Color Variables
 
-Define light and dark mode variables for the code block system:
+Define light and dark mode variables consumed by `shiki.css` and component classes:
 
 - `--color-code` — code block background
 - `--color-code-foreground` — code block text
 - `--color-code-highlight` — highlighted line background
-
-Use OKLCH or any color space. Provide `:root` (light) and `.dark` variants. These variables are consumed by both `shiki.css` and component classes, ensuring visual parity between MDX and React code blocks.
 
 ### `prose.css` — Self-Contained Typography
 
