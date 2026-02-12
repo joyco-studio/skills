@@ -3,9 +3,9 @@ name: markdown-content
 description: >
   Guide for building markdown content pages (blogs, legal, changelogs) in Next.js using
   fumadocs-mdx, rehype-pretty-code, and shiki. Covers MDX collections, self-contained prose
-  typography, syntax-highlighted code blocks, package manager command tabs, and the component
-  mappings that keep rendered markdown and custom React code components visually consistent.
-  No documentation UI framework required.
+  typography, syntax-highlighted code blocks, and the component mappings that keep rendered
+  markdown and custom React code components visually consistent. No documentation UI framework
+  required.
 license: MIT
 metadata:
   author: joyco-studio
@@ -84,7 +84,7 @@ Key patterns:
 
 - Call `plugins.shift()` inside `rehypePlugins` to remove the built-in fumadocs syntax highlighter, then `plugins.push()` rehype-pretty-code.
 - Configure **dual shiki themes** (one light, one dark) so both color sets are embedded in the markup. CSS toggles which is visible.
-- Pass custom **shiki transformers** that inject metadata into the AST (raw source text, command detection flags) for components to read at render time.
+- Pass custom **shiki transformers** that inject metadata into the AST (raw source text) for components to read at render time.
 - Use `onVisitTitle` to add `not-prose` to code block title elements so prose typography doesn't affect them.
 
 ### `next.config.ts`
@@ -141,11 +141,9 @@ This module should export:
 
 1. **A language map** — `Record<string, BuiltinLanguage>` mapping file extensions (`ts`, `tsx`, `sh`, etc.) to shiki language identifiers. Plus a `getLanguageFromExtension()` helper.
 
-2. **Command detectors** — detect package manager commands (`npm install`, `npx`, `npm run`) and produce per-manager variant strings for npm, yarn, pnpm, and bun.
+2. **Shiki transformers** — run during MDX compilation, attaching custom properties to AST nodes that components read at render time. Attach the raw source string (for copy button) so the component mapping can use it.
 
-3. **Shiki transformers** — run during MDX compilation, attaching custom properties to AST nodes that components read at render time. Attach the raw source string (for copy button), whether the block is a package manager command, and if so, the per-manager variant strings so the component mapping can render a switcher.
-
-4. **`highlightCode(code, language)`** — an async function using `codeToHtml()` with the **same dual themes** as the MDX pipeline. This is the consistency mechanism — both build-time and runtime highlighting use identical shiki config and produce the same data attributes (`data-line-numbers`, `data-line`), ensuring matching visual output everywhere.
+3. **`highlightCode(code, language)`** — an async function using `codeToHtml()` with the **same dual themes** as the MDX pipeline. This is the consistency mechanism — both build-time and runtime highlighting use identical shiki config and produce the same data attributes (`data-line-numbers`, `data-line`), ensuring matching visual output everywhere.
 
 ---
 
@@ -157,9 +155,9 @@ Maps HTML elements from the MDX compiler to React components. This is the bridge
 
 Key mappings:
 
-- **`code`** — Reads transformer metadata from props. If package manager variants are present, renders a command switcher. Otherwise renders a styled inline `<code>` element.
+- **`code`** — Renders a styled inline `<code>` element.
 
-- **`pre`** — Reads transformer metadata from props. If the block is a command, renders just the children (the `code` mapping handles it). Otherwise renders a `<pre>` with a `CopyButton` overlay using the raw source text.
+- **`pre`** — Reads transformer metadata from props. Renders a `<pre>` with a `CopyButton` overlay using the raw source text.
 
 - **`img`** — Optionally wrap with Next.js `Image` for optimization.
 
@@ -178,10 +176,6 @@ Single code display. Accepts `highlightedCode` (HTML string), `language`, option
 ### `CodeBlockTabs`
 
 Multi-file tabbed code. Accepts an array of `{ filename, highlightedCode, rawCode }` tabs. Uses controlled tab state. Renders tabs in a `<figcaption>` with a `CopyButton` for the active tab.
-
-### `CodeBlockCommand`
-
-Package manager command tabs (npm/yarn/pnpm/bun). Accepts an array of `{ label, content }` tabs. Simple tab switcher with copy button. Used by the `PackageManagerCommand` component which constructs the tabs from the per-manager props.
 
 ### `CopyButton`
 
@@ -204,13 +198,11 @@ Clipboard button with visual feedback. Uses a `useCopyToClipboard` hook that cal
 
 ### `theming.css` — Color Variables
 
-Define light and dark mode variables for the code block system:
+Define light and dark mode variables consumed by `shiki.css` and component classes:
 
 - `--color-code` — code block background
 - `--color-code-foreground` — code block text
 - `--color-code-highlight` — highlighted line background
-
-Use OKLCH or any color space. Provide `:root` (light) and `.dark` variants. These variables are consumed by both `shiki.css` and component classes, ensuring visual parity between MDX and React code blocks.
 
 ### `prose.css` — Self-Contained Typography
 
@@ -256,9 +248,9 @@ The system ensures a fenced markdown code block and a `<CodeBlock>` React compon
 2. Create `source.config.ts` with frontmatter schema and rehype-pretty-code pipeline
 3. Wrap `next.config.ts` with `createMDX()`
 4. Create `lib/source.ts` with the source loader
-5. Create `lib/shiki.ts` with language map, command detectors, transformers, and `highlightCode()`
+5. Create `lib/shiki.ts` with language map, transformers, and `highlightCode()`
 6. Create `mdx-components.tsx` mapping `pre` and `code` to custom components
-7. Create code block components (`CodeBlock`, `CodeBlockTabs`, `CodeBlockCommand`, `CopyButton`)
+7. Create code block components (`CodeBlock`, `CodeBlockTabs`, `CopyButton`)
 8. Set up `prose.css` (self-contained typography) and `shiki.css` (code block styling)
 9. Define theme variables in `theming.css` including `--color-code` family
 10. Create content directory with `meta.json` files
