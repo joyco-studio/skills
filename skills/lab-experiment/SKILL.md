@@ -1,6 +1,10 @@
 ---
 name: joyco-lab
-description: Use this skill whenever the user wants to isolate a piece of code, animation, or 3D experiment into a standalone JOYCO Lab experiment and publish it. Triggers include: "isolate this", "publish this to the lab", "create a lab experiment", "extract this animation/effect/scene", "submit to JOYCO lab", "make this an experiment". Also trigger when the user shows you a self-contained visual effect, animation, 3D scene, canvas sketch, or interactive component and wants to share or showcase it. Even if they don't say "lab" explicitly — if there's isolatable creative/technical code and a desire to share it, use this skill.
+description: "Use this skill whenever the user wants to isolate a piece of code, animation, or 3D experiment into a standalone JOYCO Lab experiment and publish it. Triggers include: \"isolate this\", \"publish this to the lab\", \"create a lab experiment\", \"extract this animation/effect/scene\", \"submit to JOYCO lab\", \"make this an experiment\". Also trigger when the user shows you a self-contained visual effect, animation, 3D scene, canvas sketch, or interactive component and wants to share or showcase it. Even if they don't say \"lab\" explicitly — if there's isolatable creative/technical code and a desire to share it, use this skill."
+license: MIT
+metadata:
+  author: joyco-studio
+  version: "0.0.1"
 ---
 
 # JOYCO Lab — Experiment Isolation & Publication
