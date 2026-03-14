@@ -86,14 +86,30 @@ This creates a new directory `<experiment-name>/` with the template scaffolded i
 
 Compare the experiment's imports against what the template already includes.
 
-For each missing package:
+### Detect the package manager
+
+Check which lockfile the scaffolded template contains and use the matching package manager:
+
+| Lockfile found | Package manager |
+|---|---|
+| `bun.lockb` or `bun.lock` | `bun` |
+| `pnpm-lock.yaml` | `pnpm` |
+| `yarn.lock` | `yarn` |
+| `package-lock.json` | `npm` |
+
+If multiple lockfiles exist, prefer the first match in the table above. If none exist, default to `npm`.
+
+### Install and verify
+
+For each missing package, install with the detected package manager:
 ```bash
-cd <experiment-name> && npm install <package>
+cd <experiment-name> && <pm> install <package>
+# e.g. bun add three, pnpm add three, yarn add three, npm install three
 ```
 
 Then run the dev server to confirm no import errors:
 ```bash
-npm run dev
+<pm> run dev
 ```
 
 Fix any issues before proceeding. Common ones:
@@ -105,7 +121,9 @@ Fix any issues before proceeding. Common ones:
 
 ## Step 6 — Deploy to Vercel
 
-From inside the experiment directory:
+**Ask the user if they want to deploy to Vercel now.** If they decline, skip to Step 7 — they can deploy later and provide the URL manually when running `joyco lab`.
+
+If they confirm, run from inside the experiment directory:
 ```bash
 vercel --prod
 ```
