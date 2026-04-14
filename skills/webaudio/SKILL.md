@@ -204,6 +204,8 @@ suno.get('click').play({ output: fx })
 suno.get('hover').play({ output: fx })
 ```
 
+For reusable effect modules (classes that wrap a node graph, expose a `chain` head, and are safe to declare at module scope alongside `suno`), follow the pattern in [`writing-effects.md`](./writing-effects.md). It covers SSR-safe construction, `attach()` / `detach()` lifecycle, buffered params, parallel topologies (dry/wet), and per-voice routing.
+
 ### Global slowmo / fast-forward
 
 Affects every live voice and seeds new ones. Great for pause menus:
