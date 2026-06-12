@@ -112,11 +112,19 @@ git rebase --onto <new-base> <old-base> <branch>
 # e.g. git rebase --onto origin/main dev1/feature-branch-1 dev2/feature-branch-2
 ```
 
-`<old-base>` must be the tip of the parent branch *as it exists inside this branch's history* — the commit after which this branch's own work begins. Find it, in order of preference:
+`<old-base>` must be the commit *inside this branch's history* after which the branch's own work begins. A parent branch ref, if one exists, is only a hint for finding it — remotes delete branches after merging, and local copies go stale. Candidates, best first:
 
-1. The parent branch ref still exists (local or `origin/...`) → use it directly. Sanity-check it's actually in our history: `git merge-base --is-ancestor <old-base> <branch>`.
-2. The ref was deleted after merging → list `git log --oneline <new-base>..<branch>`: it shows the parent's commits plus this branch's own, oldest at the bottom; the boundary (author/subject switch to this branch's work) gives you the old base SHA.
-3. Equivalent shortcut once you've counted this branch's own commits (N): `git rebase --onto <new-base> HEAD~N <branch>`.
+1. A parent ref exists (local or `origin/...`): candidate = `git merge-base <parent-ref> <branch>` — not the ref itself, because the parent may have gained commits after this branch was stacked on it.
+2. No usable ref, but the branch was created on this machine: `git reflog show <branch> | tail -3` — the "branch: Created from ..." entry. Reflogs are local-only; a fresh clone won't have this.
+3. No ref, no reflog: read the boundary out of `git log --oneline <new-base>..<branch>` (oldest at the bottom: the parent's commits first, then this branch's own). The switch in author and subject marks it. Cross-reference the squash commit on the target: squash-merge messages typically list the squashed commit subjects, and `git show --stat <squash-commit>` lists its paths — commits matching either belong to the parent.
+4. Equivalent shortcut once this branch's own commits are counted (N): use `HEAD~N` as the old base.
+
+**Validate the candidate before rebasing, whatever its source:**
+
+- `git merge-base --is-ancestor <old-base> <branch>` must pass.
+- `git log --oneline <old-base>..<branch>` must list **exactly this branch's own commits**: nothing authored by others or named in the squash commit's message (that means the candidate sits too low — e.g. a stale local ref from before the parent's last commits), and none of this branch's own work missing (a candidate that sits too high silently drops commits — the worst outcome).
+
+If validation fails, walk the boundary by hand per step 3. When genuinely torn between adjacent candidates, prefer the lower one: too low merely replays a few already-merged patches (they conflict or come up empty and can be skipped after confirming they're upstream), while too high loses work.
 
 Pitfall: `git merge-base <new-base> <branch>` is **not** the old base here — it returns the original fork point from main, *below* the parent's commits, and would replay the parent's work again.
 
