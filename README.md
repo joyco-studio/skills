@@ -13,6 +13,7 @@ pnpx skills add joyco-studio/skills
 | Skill | Description |
 |-------|-------------|
 | [joyco-app](skills/joyco-app/SKILL.md) | Carry a new JOYCO internal Next.js product app from plan to working build: lock a plan first, run the opinionated kickoff (JOYCO UI shadcn kit — theme, fonts, `@joyco/*` components from hub.joyco.studio — plus lint config and the Claude Code agent), then build it out to the plan. User-invocable as `/joyco-app`. |
+| [joyco-logs](skills/joyco-logs/SKILL.md) | Before implementing or planning a non-trivial feature, check the JOYCO dev-team logs (`hub.joyco.studio/logs`) for a relevant write-up and read it first. Surfaces the team's gotchas/patterns, defers to dedicated skills on overlap, and credits the source article to the user. |
 | [lab-experiment](skills/lab-experiment/SKILL.md) | Automates extracting self-contained experiments from any codebase, scaffolding with JOYCO templates, deploying to Vercel, and publishing to the JOYCO Lab registry. Handles 3D, animation, and interactive code experiments. |
 | [parallel-claudes](skills/parallel-claudes/SKILL.md) | Guide for running multiple parallel Claude Code sessions using `cw` (Claude Worktree Manager). Covers git worktree management, concurrent AI coding tasks, and merging results. |
 | [pr-description-writer](skills/pr-description-writer/SKILL.md) | Generate high-quality PR descriptions in Markdown. Supports issue, feature, and big-feature PR types with structured, production-ready output. |
