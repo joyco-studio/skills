@@ -211,6 +211,8 @@ This is the non-interactive equivalent of `joyco components` (avoid that interac
 
 Work the plan's milestones in order. Keep `pnpm dev` running, verify each chunk in the browser, and lint as you go. Iterate with the dev until the plan's milestones are met — that's the end of the loop, not the scaffold.
 
+**Use the kit correctly as you build.** Don't lay out screens from generic shadcn habits — the JOYCO kit has its own conventions (transparent `Cluster` containers, `Filler` over `justify-between`, no borders/rounded corners). Follow the `joyco-ui` skill, which routes you to the live hub docs and the installed component source rather than a stale cheat-sheet.
+
 ---
 
 ## Pitfalls
