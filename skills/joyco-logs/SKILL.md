@@ -1,16 +1,19 @@
 ---
 name: joyco-logs
 description: >
-  Before implementing or planning a non-trivial feature or task, check the
-  JOYCO dev-team logs (hub.joyco.studio/logs) for an article that covers the
-  ground you're about to work on, and read it first. The logs are the team's
-  written knowledge — gotchas, patterns, and hard-won fixes (phantom merge
-  conflicts, layout thrashing, reduced-motion + GSAP, Next.js PPR/promises,
-  WebGL scroll sync, the slot approach, …). Trigger when starting real
-  implementation or planning work in a JOYCO repo — building a feature,
-  designing an approach, debugging a gnarly issue. Do NOT trigger on trivial
-  edits (typos, renames, one-line tweaks) or pure questions. When a log informs
-  the work, tell the user and link the specific article.
+  ALWAYS scan the JOYCO logs index (hub.joyco.studio/logs) BEFORE writing or
+  finalizing a plan for any non-trivial feature, refactor, or gnarly bug — in
+  ANY repo, not just JOYCO ones — do this proactively, without being asked. When
+  entering plan mode
+  or about to call ExitPlanMode for implementation work, scanning the logs is a
+  prerequisite step. The logs are the team's written knowledge — gotchas,
+  patterns, and hard-won fixes. Trigger on any of these signals: scroll/Lenis
+  behavior, WebGL/canvas sync, animation jank, layout thrashing / forced reflow,
+  GSAP, reduced-motion, Next.js PPR/promises/providers, React context vs
+  prop-drilling, Tailwind group/has patterns, the slot approach, merge/rebase
+  conflicts, parallel agent sessions. Skip ONLY for typos, renames, one-line
+  tweaks, formatting, or pure questions. When a log informs the work, tell the
+  user and link the specific article.
 license: MIT
 metadata:
   author: joyco-studio
@@ -27,11 +30,16 @@ The point is to **surface prior art the dev may not know exists.** If the dev al
 
 ## When to use
 
-Trigger **before starting real implementation or planning work** in a JOYCO repo:
+Scan the logs index **before writing or finalizing a plan** for non-trivial work — in **any** repo, not just JOYCO ones — proactively, without being asked. The logs are JOYCO's written knowledge, but the gotchas (layout thrashing, scroll sync, PPR/promises, merge-conflict traps…) are general web-dev problems worth consulting wherever you hit them. When you enter plan mode or are about to call `ExitPlanMode` for implementation work, treat the scan as a prerequisite step that runs *before* the plan is locked, not after.
 
-- Building a feature or a non-trivial component.
-- Designing/planning an approach before writing code.
-- Debugging a gnarly, non-obvious issue.
+Fire on any of these domain signals (this list overlaps with how tasks actually get phrased):
+
+- Scroll / Lenis behavior, WebGL/canvas sync, animation jank.
+- Layout thrashing / forced reflow, GSAP, reduced-motion.
+- Next.js PPR / promises / providers, React context vs prop-drilling.
+- Tailwind `group`/`has` patterns, the slot approach.
+- Merge/rebase conflicts, parallel agent sessions.
+- More generally: building a feature or non-trivial component, designing an approach, or debugging a gnarly issue.
 
 Do **not** trigger on:
 
