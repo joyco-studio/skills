@@ -48,7 +48,12 @@ Define tokens as custom properties on `:root` in the global stylesheet, same nam
 
 ## Springs
 
-Figma Motion spring easings, or beziers you agreed to treat as springs, map to the CSS `linear()` function. Generate a `linear()` approximation (15-30 stops) and store it as a token the same way. If browser support for `linear()` is a concern for the project, fall back to the closest bezier.
+Figma Motion spring easings, or beziers you agreed to treat as springs, map to the CSS `linear()` function — a sampled approximation (15-30 stops) stored as a token the same way. But `linear()` easing is not universally supported (no Safari before 17.2, no legacy engines), so **check the project's browser targets before you commit to it**: read the `browserslist`/`.browserslistrc` config (or ask the user) and confirm every target supports `linear()`.
+
+- **All targets support `linear()`** → emit the sampled `linear()` token; the designed spring survives faithfully.
+- **A target does not** → do NOT silently ship a bezier that discards the spring feel. A cubic-bezier cannot express overshoot/settle, so this is a fidelity downgrade the user must sign off on. Surface it: name the tradeoff (closest bezier approximation vs. dropping the spring) and, if the project has a JS animation library available (Motion, GSAP, anime.js), recommend driving that one animation there instead, where the real spring is expressible. Record whichever path was chosen in the fidelity note.
+
+`@supports (transition-timing-function: linear(0, 1))` can gate a `linear()` enhancement over a bezier base when a progressive-enhancement approach is acceptable and the bezier fallback is genuinely close enough — still a user call, not a silent default.
 
 ## Tier 2 in CSS: View Transitions
 

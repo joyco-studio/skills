@@ -59,7 +59,7 @@ This is Motion's home turf. Do not port canvas coordinates; use the layout engin
 - Expansion/reorder within one component tree: `layout` prop. Motion FLIPs it and corrects scale distortion on borderRadius and boxShadow automatically (use `style={{ borderRadius: 6 }}` rather than a class so Motion can correct it).
 - Shared element across components (grid card → fullscreen detail): same `layoutId` on both elements; wrap conditional pair in `<AnimatePresence>`.
 - The Figma data contributes: duration and easing (`transition={{ layout: { duration: DUR.reveal, ease: EASE.expand } }}`), the choreography (what delays/holds precede the move), and the sibling treatment (Tier 1 blur/dim, ship as a plain `animate` on the siblings with `EASE.recede`).
-- If the moving element contains an image, prevent stretching during the FLIP with `layout` on the wrapper and `layout="preserve-aspect"` or a nested `layout` child, verify visually.
+- If the moving element contains an image, prevent stretching during the FLIP with `layout` on the wrapper plus a nested `layout` child and explicit aspect-ratio constraints, then verify visually.
 
 Runtime measurement beyond what `layout` handles (e.g. custom scroll-linked values) goes through Metri when available, never raw `getBoundingClientRect` in render or in scroll handlers. See `references/performance.md`.
 

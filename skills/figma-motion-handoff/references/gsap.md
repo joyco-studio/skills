@@ -22,7 +22,7 @@ useGSAP(() => {
   }).to('[data-motion="reveal-card"]', {
     opacity: 1,
     y: 0,
-    duration: seconds(DUR.reveal),
+    duration: DUR.reveal, // GSAP tokens are stored in seconds (see Tokens above)
     ease: "out",
   })
 }, { scope })

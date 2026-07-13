@@ -91,7 +91,7 @@ Some logs and tools have a specialized skill that goes deeper than the article o
 | Layout thrashing, forced reflow | `thrash-report-analyzer` |
 | Parallel Claude sessions / `cw` worktrees | `parallel-claudes` |
 | Sound effects / UI audio / `suno` | `webaudio` |
-| JOYCO UI kit / branded components / `metri` | `joyco-ui` |
+| JOYCO UI kit / branded components | `joyco-ui` |
 | New JOYCO Next.js app kickoff | `joyco-app` |
 
 (If a log or tool gains a dedicated skill later, prefer the skill — this list isn't exhaustive.)
