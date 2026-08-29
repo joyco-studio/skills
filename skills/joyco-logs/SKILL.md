@@ -90,6 +90,7 @@ Some logs and tools have a specialized skill that goes deeper than the article o
 | Layout thrashing, forced reflow | `thrash-report-analyzer` |
 | JOYCO UI kit / branded components | `joyco-ui` |
 | New JOYCO Next.js app kickoff | `joyco-app` |
+| Studio library discovery or dependency selection | `studio-libraries` |
 
 (If a log or tool gains a dedicated skill later, prefer the skill — this list isn't exhaustive.)
 
