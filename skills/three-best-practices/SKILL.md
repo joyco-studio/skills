@@ -1,5 +1,5 @@
 ---
-name: threejs
+name: three-best-practices
 description: >
   Build, review, debug, and optimize production Three.js experiences. Use for
   Three.js scenes, React Three Fiber, WebGL or WebGPU renderers, GLSL shaders,
