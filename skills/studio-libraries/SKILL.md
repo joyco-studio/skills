@@ -66,12 +66,18 @@ Classify the result:
 
 ### 3. Read each candidate's documentation
 
-Follow the link supplied by the index and fetch its markdown before deciding or
-implementing:
+Follow the exact documentation link supplied by the matched index entry before
+deciding or implementing. Resolve relative links against
+`https://hub.joyco.studio`, but preserve the supplied path, query, and fragment;
+do not reconstruct the URL from the library name or slug. The link may point to
+a noncanonical hub route or an external documentation site.
 
 ```bash
-curl -fsSL https://hub.joyco.studio/toolbox/<library-slug>.md
+curl -fsSL '<exact documentation URL from the matched index entry>'
 ```
+
+Use the available web-reading tool when the target is HTML or requires following
+redirects. Do not transform the supplied URL to obtain a preferred format.
 
 Read enough of the current documentation to understand:
 
@@ -113,6 +119,8 @@ match for this task.” Then proceed without padding the response.
 - **Treating the catalog as static.** Always fetch `libraries.md` fresh.
 - **Choosing from the summary alone.** Read the linked documentation before
   adopting or rejecting a plausible match.
+- **Reconstructing documentation URLs.** Follow the index-supplied link; do not
+  assume every library uses `/toolbox/<slug>.md` or is hosted on the hub.
 - **Matching only by package category.** Match the problem, lifecycle, and
   performance characteristics.
 - **Forcing a match.** A clean “no match” is better than an unnecessary
@@ -124,7 +132,8 @@ match for this task.” Then proceed without padding the response.
 
 - [ ] Fetched the live library index before planning or implementation.
 - [ ] Compared every current entry against the task and repository constraints.
-- [ ] Read the current docs for each plausible candidate.
+- [ ] Read the current docs for each plausible candidate using the exact link
+      supplied by the index.
 - [ ] Used the Studio library when it was a strong fit, or recorded a concise
       no-match decision.
 - [ ] Linked the specific library page when it informed the work.
