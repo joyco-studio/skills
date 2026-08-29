@@ -3,6 +3,10 @@ name: trace-audit
 description: Analyze a Chrome DevTools Performance trace JSON file for performance anomalies, producing a structured audit report with critical issues, warnings, metrics, timeline hotspots, and actionable recommendations.
 user-invocable: true
 argument-hint: <trace-file.json>
+license: MIT
+metadata:
+  author: joyco-studio
+  version: "0.0.1"
 ---
 
 # Chrome DevTools Trace Audit
@@ -39,7 +43,7 @@ Use Grep on the trace file to extract (run these in parallel):
 
 ### Step 3 — Run detection passes
 
-Refer to `detection-heuristics.md` for the full set of patterns and thresholds. Run all detection categories **in parallel** using Grep. For each category:
+Refer to [`detection-heuristics.md`](./detection-heuristics.md) for the full set of patterns and thresholds. Run all detection categories **in parallel** using Grep. For each category:
 - Use the specified grep pattern on the trace file
 - Collect matching lines with surrounding context where helpful (`-C 1` or `-C 2`)
 - Count matches and extract durations/values from the matched JSON
@@ -73,7 +77,7 @@ Group flagged events by timestamp into time windows (e.g., 500ms buckets). Ident
 
 ### Step 6 — Generate report
 
-Output the report using the structure defined in `report-format.md`. The report should be:
+Output the report using the structure defined in [`report-format.md`](./report-format.md). The report should be:
 - Actionable — every issue links to a concrete fix
 - Scannable — use tables, severity badges, and clear headings
 - Complete — cover all categories, even if just to say "no issues found"
