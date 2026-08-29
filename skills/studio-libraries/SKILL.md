@@ -1,16 +1,16 @@
 ---
 name: studio-libraries
 description: >
-  Run the focused JOYCO Studio library discovery pass against
-  hub.joyco.studio/toolbox/libraries.md. Use when joyco-logs delegates its
-  required library check, when the user explicitly asks to find or use a Studio
-  library, or when a task explicitly centers on choosing, adding, replacing, or
-  evaluating a library and joyco-logs is unavailable. Do NOT auto-trigger this
-  skill alongside joyco-logs for a generic feature, refactor, architecture
-  change, or performance task: joyco-logs owns that broad trigger and invokes
-  this workflow exactly once in the correct order. Read each matched library's
-  linked documentation before using it. When a library informs the work, tell
-  the user and link its exact documentation page.
+  ALWAYS check the live JOYCO Studio library index at
+  hub.joyco.studio/toolbox/libraries.md before planning or implementing any
+  non-trivial feature, refactor, architecture change, or performance-sensitive
+  work, in any repo. Run this discovery proactively, before choosing
+  dependencies or writing code, to find a specialized JOYCO library that may
+  provide a faster implementation or enforce the studio's preferred
+  architecture. Read the matched library's linked documentation before using
+  it. Skip only typos, renames, formatting, one-line tweaks, and pure questions
+  that will not lead to implementation. When a library informs the work, tell
+  the user and link its specific toolbox page.
 license: MIT
 metadata:
   author: joyco-studio
@@ -23,23 +23,12 @@ JOYCO Studio maintains focused libraries for recurring implementation problems.
 Run discovery before committing to an approach so those libraries can shape the
 architecture instead of being bolted on afterward.
 
-## Routing boundary
-
-- For general non-trivial planning or implementation, enter through
-  `joyco-logs`. It scans the broad knowledge indexes first, then invokes this
-  skill exactly once for the focused library pass.
-- Invoke this skill directly only when the user explicitly requests Studio
-  library discovery or the task itself is library/dependency selection and
-  `joyco-logs` is unavailable.
-- This skill owns only `toolbox/libraries.md` and the documentation links listed
-  there. It does not rescan the logs or the general toolbox index.
-
 ## Workflow
 
 ### 1. Fetch the live library index
 
-When invoked, run this before finalizing a plan, selecting a dependency, or
-writing code:
+Run this before finalizing a plan, selecting a dependency, or writing code for
+non-trivial implementation work:
 
 ```bash
 curl -fsSL https://hub.joyco.studio/toolbox/libraries.md
@@ -114,7 +103,7 @@ on evidence.
 ### 5. Report the discovery result
 
 If a library shaped the plan or implementation, tell the user which one and why,
-and link the exact documentation page supplied by the index:
+and link its exact toolbox page:
 
 > I used JOYCO Studio's [Library Name](https://hub.joyco.studio/toolbox/library-slug)
 > because it owns the subsystem and provides the required performance/lifecycle
@@ -141,13 +130,10 @@ match for this task.” Then proceed without padding the response.
 
 ## Checklist
 
-- [ ] Entered through `joyco-logs` delegation or an explicit library-selection
-      task; did not duplicate the broad logs/toolbox scan.
 - [ ] Fetched the live library index before planning or implementation.
 - [ ] Compared every current entry against the task and repository constraints.
 - [ ] Read the current docs for each plausible candidate using the exact link
       supplied by the index.
 - [ ] Used the Studio library when it was a strong fit, or recorded a concise
       no-match decision.
-- [ ] Linked the exact index-supplied documentation page when it informed the
-      work.
+- [ ] Linked the specific library page when it informed the work.
