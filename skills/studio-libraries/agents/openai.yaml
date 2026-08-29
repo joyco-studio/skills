@@ -1,0 +1,4 @@
+interface:
+  display_name: "Studio Libraries"
+  short_description: "Discover the right JOYCO library first"
+  default_prompt: "Use $studio-libraries to check for a relevant JOYCO library before implementing this feature."
