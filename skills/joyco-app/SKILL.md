@@ -6,7 +6,8 @@ description: >
   agent session, or one you draft together), then runs the opinionated kickoff
   — Next.js + TypeScript + Tailwind wired to the JOYCO UI shadcn registry
   (@joyco/ui kit: components, theme, fonts from hub.joyco.studio), JOYCO lint
-  config, and the Claude Code agent — and then builds the app out to the plan.
+  config, and the current harness's agent guidance — and then builds the app
+  out to the plan.
   User-invocable as /joyco-app <project-name>. Triggers on "new joyco app",
   "start a joyco project", "kickoff an internal joyco app", "build this as a
   joyco app", "set up joyco/ui", and on mentions of the joyco CLI, the @joyco
@@ -164,13 +165,22 @@ joyco lint-config
 
 Downloads `eslint.config.mjs`, `.prettierrc`, `.prettierignore` from `joyco-studio/lint-config` and installs the dev deps (eslint, eslint-config-next, eslint-plugin-import-x, eslint-plugin-simple-import-sort, prettier, prettier-plugin-tailwindcss). Prompts only if those files already exist (create-next-app's `--eslint` writes one) — confirm the overwrite. No CLI? Clone those files manually and `pnpm add -D` the deps.
 
-## Step 6 — Add the Claude Code agent
+## Step 6 — Add the JOYCO agent guidance
 
 ```bash
-pnpx @joycostudio/scripts@latest agents -s claude
+pnpx @joycostudio/scripts@latest agents -s codex # or: claude / cursor
 ```
 
-Exactly what `joyco agents` → "Claude Code" runs, but non-interactive (`-s claude`). Drops the JOYCO agent config into the project. (Swap `-s cursor` / `-s codex` for a different platform.)
+Use the harness running the task instead of installing a hardcoded default.
+`codex` and `cursor` target `AGENTS.md`; `claude` targets `CLAUDE.md`.
+
+Before running the command, inspect that target path:
+
+- If it does not exist, run the command with the current harness strategy.
+- If it exists, do not run the command from a non-interactive agent session: it
+  prompts for overwrite/append/cancel. Fetch the current source from
+  `https://registry.joyco.studio/AGENTS.md`, compare it with the existing file,
+  and merge missing JOYCO rules without overwriting project-local guidance.
 
 ## Step 7 — Verify the kickoff
 
@@ -236,7 +246,7 @@ Work the plan's milestones in order. Keep `pnpm dev` running, verify each chunk 
 - [ ] Next.js app created with TypeScript + Tailwind + App Router.
 - [ ] shadcn initialized; `@joyco` namespace registered in `components.json` and a registry URL returns 200.
 - [ ] `@joyco/ui` kit installed (components + theme + fonts); fonts imported/applied in `layout.tsx`.
-- [ ] Lint config present and dev deps installed; Claude Code agent added.
+- [ ] Lint config present and dev deps installed; current-harness agent guidance added without overwriting existing instructions.
 - [ ] `pnpm dev` boots clean; theme + fonts visibly applied.
 
 **Phase 3 — Build**

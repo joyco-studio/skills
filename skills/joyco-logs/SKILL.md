@@ -76,7 +76,7 @@ Each returns a markdown list — logs are title + `/logs/NN-slug` links (reverse
 Read the titles/descriptions in both lists. Is any log or tool on-topic for what you're about to implement, plan, or debug? Match on the *problem domain*, not exact wording:
 
 - **Logs** — "WTF Is Layout Thrashing" is relevant to "my scroll handler is janky"; "Promises, PPR, and the Root Provider Pattern" is relevant to "set up data fetching in the app router".
-- **Toolbox** — "measure the DOM without thrashing" → `Metri`; "add sound effects" → `Suno`; "run parallel Claude sessions" → `Claude Worktree (cw)`; "generate an SDF font atlas" → `msdfgen`; "inspect a glTF" → `GLTF`; "branded UI components" → `UI Kit`. A tool match means: prefer the JOYCO tool over writing it yourself or reaching for an unrelated third-party dependency.
+- **Toolbox** — "measure the DOM without thrashing" → `Metri`; "add sound effects" → the current studio audio libraries; "run parallel agent sessions" → use the active harness first, and consult worktree tooling only when harness isolation does not cover the task; "generate an SDF font atlas" → `msdfgen`; "inspect a glTF" → `GLTF`; "branded UI components" → `UI Kit`. A tool match means: prefer the current JOYCO tool over writing it yourself or reaching for an unrelated third-party dependency.
 
 - **No match** → say so in one short line and proceed. Don't force a connection or pad the work with an irrelevant log or tool.
 - **Match** → continue.
@@ -87,10 +87,7 @@ Some logs and tools have a specialized skill that goes deeper than the article o
 
 | Log / tool topic | Use this skill instead |
 |---|---|
-| Phantom / merge conflicts, rewritten history | `resolving-git-conflicts` |
 | Layout thrashing, forced reflow | `thrash-report-analyzer` |
-| Parallel Claude sessions / `cw` worktrees | `parallel-claudes` |
-| Sound effects / UI audio / `suno` | `webaudio` |
 | JOYCO UI kit / branded components | `joyco-ui` |
 | New JOYCO Next.js app kickoff | `joyco-app` |
 
@@ -124,7 +121,7 @@ Always link the exact `/logs/NN-slug` or `/toolbox/slug` URL, not just `/logs` o
 - **Forcing a match.** Most tasks won't have a relevant log or tool. "Nothing relevant in the logs or toolbox" is a fine, expected outcome — say it in one line and move on. Don't shoehorn an unrelated article or tool in to look thorough.
 - **Reading the source but not crediting it.** If a log or tool changed what you did, the dev should know — link it (step 5).
 - **Linking the index instead of the specific page.** Always give the specific `/logs/NN-slug` or `/toolbox/slug` URL.
-- **Re-deriving what a dedicated skill already owns.** If the topic maps to `resolving-git-conflicts` / `thrash-report-analyzer` / `parallel-claudes` / `webaudio` / `joyco-ui` / `joyco-app`, use that skill.
+- **Re-deriving what a dedicated skill already owns.** If the topic maps to `thrash-report-analyzer` / `joyco-ui` / `joyco-app`, use that skill.
 - **Building what the toolbox already ships.** Before hand-rolling DOM measurement, an audio layer, worktree management, or an atlas/SDF pipeline — or installing a third-party equivalent — check the toolbox for the JOYCO tool.
 - **Triggering on trivial work.** A rename doesn't need a scan. Respect the "when to use" gate or the skill becomes noise.
 
