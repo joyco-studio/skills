@@ -33,6 +33,15 @@ Prefer a small scene/controller boundary with explicit `mount`, `resize`,
 Module singletons are acceptable only when the application intentionally owns
 them for its full lifetime.
 
+## Keep helper logic out of entities
+
+- Do not mix an entity's core functionality with business logic owned by a
+  helper. Keep that boundary explicit.
+- A helper should be removable by deleting its file and references, without
+  having to extract helper-specific behavior from the entities it used.
+- Keep important entity behavior close to the entity so scanning the code
+  reveals the core logic without helper concerns obscuring it.
+
 ## Separate stable state from frame state
 
 - Create geometry, materials, loaders, render targets, and controls outside the
