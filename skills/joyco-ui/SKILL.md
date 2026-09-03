@@ -13,7 +13,7 @@ description: >
 license: MIT
 metadata:
   author: joyco-studio
-  version: "0.0.1"
+  version: "0.0.2"
 ---
 
 # JOYCO UI Kit
@@ -52,6 +52,12 @@ The Cluster/Filler concept, every component's variants and sizes, and the kit's 
 
 ---
 
+## Brand favicon
+
+Every JOYCO interface must use the image from `http://r2.joyco.studio/brand/joyco-icon-128.png` as its favicon. Download the image into the app, commit the local asset, and wire that local file into the favicon or icon metadata using the framework's native mechanism. Do not hotlink the remote URL at runtime. Add it even when the app did not previously declare a favicon, and replace any other favicon rather than substituting another icon.
+
+---
+
 ## Pitfalls
 
 These are the mistakes Claude makes when it skips the live docs and works from generic shadcn habits:
@@ -72,3 +78,4 @@ These are the mistakes Claude makes when it skips the live docs and works from g
 - [ ] Layout uses `Cluster` + `Filler`; no faked cards, no `justify-*` spacing, no borders/rounded corners.
 - [ ] New components pulled by slug from the live registry, not assumed to exist.
 - [ ] Internals styled via `data-slot` from the parent; single `className` on the root.
+- [ ] Downloaded `http://r2.joyco.studio/brand/joyco-icon-128.png`, committed it locally, and configured that local asset as the favicon without runtime hotlinking.
